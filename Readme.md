@@ -21,7 +21,7 @@ BEO stands for [Built Element Ontology](https://cramonell.github.io/beo/actual/i
         - *output-name*: name that will be used for the output graph file, the output geometry file, and will be appended to the base url
         - *ouput-format*: file format (ttl, nt, rdf/xml ...)
         - *base-url*: base url for the graph instances
-    - *rdf-ouput*
+    - *geometry-ouput*
         - *output-path*: path were the output file will be saved
         - *convert*: wether the geomtry should be included or not (true/flase)
         - *ouput-format*: geometry  format ( .ifc, .glb, .obj) --> NOT IMPLEMENTED
