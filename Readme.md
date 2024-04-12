@@ -28,7 +28,7 @@ BEO stands for [Built Element Ontology](https://cramonell.github.io/beo/actual/i
         - *split*: wether the geomtry of each is stored in a different file (true/flase)--> NOT IMPLEMENTED
 
 5. **License**:
-   This project is licensed under the GNU General Public License (GNU GPL). You can find the full text of the license in the LICENSE.txt file.
+   - This project is licensed under the GNU General Public License (GNU GPL). You can find the full text of the license in the LICENSE.txt file.
 
 
 
