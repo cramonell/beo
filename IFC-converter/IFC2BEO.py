@@ -2,17 +2,24 @@ import ifcopenshell
 import ifcopenshell.geom
 from rdflib import Graph, Namespace, Literal, URIRef
 import json
+import pathlib
 import os
 
-####PARAMETERS
-with open('./IFC-converter/config.json', 'r',encoding='utf-8') as fp:
+script_dir = pathlib.Path(__file__).parent
+config_path = (script_dir / 'config.json').resolve()
+ontology_config_file = (script_dir.parent / 'ontology-config.json').resolve()
+
+### PARAMETERS
+with open(config_path, 'r',encoding='utf-8') as fp:
     params =json.load(fp)
+
+with open(ontology_config_file, 'r',encoding='utf-8') as fp:
+    config_file =json.load(fp)
 
 # IFC file path
 file_path = params['ifc-file-path']
 if params['rdf-output']['output-name']: asset_name = params['rdf-output']['output-name']
 else: asset_name = file_path.split('/')[-1].split('.')[0]
-
 
 # load IFC file
 file = ifcopenshell.open(file_path)
@@ -149,8 +156,6 @@ for declaration in schema.declarations():
             else: print(type)
             type_maps[declaration.name()]=type                
 
-with open('ontology-config.json', 'r',encoding='utf-8') as fp:
-    config_file =json.load(fp)
 
 ## non-geometrical information
 

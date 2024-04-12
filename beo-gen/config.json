@@ -1,3 +1,4 @@
 {
-    "output-path":"./"
+    "output-path":"./",
+    "output-format":"nt"
 }

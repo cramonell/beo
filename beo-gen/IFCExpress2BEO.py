@@ -2,11 +2,20 @@ from ifcopenshell import ifcopenshell_wrapper
 import json
 from rdflib import Graph, Namespace, Literal, URIRef, BNode 
 import datetime
+import pathlib
+
+script_dir = pathlib.Path(__file__).parent
+config_path = (script_dir / 'config.json').resolve()
+ontology_config_file = (script_dir.parent / 'ontology-config.json').resolve()
 
 
-with open('./beo-gen/config.json', 'r',encoding='utf-8') as fp:
+with open(config_path, 'r',encoding='utf-8') as fp:
     p =json.load(fp)
-    save_folder = p['ouput-path']
+    save_folder = p['output-path']
+    save_format = p['output-format']
+
+with open(ontology_config_file, 'r',encoding='utf-8') as fp:
+    config_file =json.load(fp)
 
 # load the express IFC schema
 schema_name = "IFC4X3_Add2"
@@ -197,8 +206,7 @@ entities = []
 labels = {}
 
 
-with open('ontology-config.json', 'r',encoding='utf-8') as fp:
-    config_file =json.load(fp)
+
 
 ignore_relations = [
             'IfcRelSpaceBoundary',
@@ -539,7 +547,7 @@ date = datetime.datetime.now()
 
 path = save_folder + 'beo_' + datetime.datetime.today().strftime('%Y-%m-%d').replace('-', '')
 
-g.serialize(destination= path + '.ttl', format ='turtle')
+g.serialize(destination= path + '.' + save_format, format =save_format)
 
 
 
