@@ -8,7 +8,8 @@ BEO stands for [Built Element Ontology](https://cramonell.github.io/beo/actual/i
    - Install requirements : [ifcopenshell](https://ifcopenshell.org/), [rdflib](https://rdflib.readthedocs.io/en/stable/index.html)
 
 2. **Usage**:
-   - For both converters jus  run the script  either from the command line or from your prefered code editor. Each converter uses a config.json file (explained below) and the ontology-config json file, 
+   - For both converters jus  run the script  either from the command line or from your prefered code editor. Each converter use a config.json file (explained below).
+   - The ontology-config.json file contains the mapping between the IFC entities and the BEO entities and it is the base for both converters.
 
 3. **Configuration BEO generator ([beo-gen](https://github.com/cramonell/beo/tree/main/beo-gen))**:
    - *output-path*: path were the output file will be saved
