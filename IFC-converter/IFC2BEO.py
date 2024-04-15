@@ -33,7 +33,9 @@ ifc_graph = Graph()
 ifc_graph.parse(ifc_graph_path, format = 'turtle')
 
 # urls
-asset_ref =  URIRef("http://www.carlos-server.test/assets/"+asset_name+"/")
+if params['rdf-output']['base-url'].endswith('/'): asset_base_ref = params['rdf-output']['base-url'] + asset_name + '/'
+else: asset_base_ref = params['rdf-output']['output-path'] + '/' + asset_name + '/'
+asset_ref =  URIRef(asset_base_ref)
 beo_ref =  URIRef("https://w3id.org/beo#")
 
 if params['rdf-output']['output-path'].endswith('/'): save_path = params['rdf-output']['output-path'] + asset_name

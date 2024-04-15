@@ -545,7 +545,7 @@ g.add((BEO['ifc-globalId'], RDFS.label,  Literal('ifc-globalId')))
 
 date = datetime.datetime.now()
 
-path = save_folder + 'beo_' + datetime.datetime.today().strftime('%Y-%m-%d').replace('-', '')
+path = save_folder + 'beo_' + datetime.datetime.today().strftime('%Y%m%d')
 
 g.serialize(destination= path + '.' + save_format, format =save_format)
 
