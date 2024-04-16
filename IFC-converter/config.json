@@ -2,7 +2,7 @@
     "ifc-file-path": "D:/UPC_PhD/01.Ashvin/DEV/test/ontologies/ifc-ontology/examples/LLobregat_20240221.ifc",
     "rdf-output":{
         "output-path": "./IFC-converter/tests/",
-        "output-name": "test",
+        "output-name": "llobregat-bridge",
         "output-format": "ttl",
         "base-url": "http://www.carlos-server.test/assets/"
     },
