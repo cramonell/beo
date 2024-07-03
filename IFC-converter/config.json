@@ -1,10 +1,10 @@
 {   
-    "ifc-file-path": "D:/UPC_PhD/01.Ashvin/DEV/test/ontologies/ifc-ontology/examples/LLobregat_20240221.ifc",
+    "ifc-file-path": "D:/UPC_PhD/01.Ashvin/DEMOS/DEMO-7/CASTELLBISBAL/BIM/LLobregat_20240221.ifc",
     "rdf-output":{
-        "output-path": "./IFC-converter/tests/",
+        "output-path": "D:/UPC_PhD/02.TUe-estancia/dev/ontologies/data",
         "output-name": "llobregat-bridge",
         "output-format": "ttl",
-        "base-url": "http://www.carlos-server.test/assets/"
+        "base-url": "http://0.0.0.0:5004/containers/cont_001/data/graph/"
     },
     "geometry-output":{
         "convert": true,

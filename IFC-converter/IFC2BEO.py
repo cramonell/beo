@@ -26,15 +26,15 @@ file = ifcopenshell.open(file_path)
 file_info = os.stat(file_path)
 file_size_bytes = file_info.st_size
 
-#load ifcOwl ontology -- when ontology is published read from online url
+# load ifcOwl ontology -- when ontology is published read from online url
 ifc_graph_path =  "beo.ttl"
 print(ifc_graph_path)
 ifc_graph = Graph()
 ifc_graph.parse(ifc_graph_path, format = 'turtle')
 
 # urls
-if params['rdf-output']['base-url'].endswith('/'): asset_base_ref = params['rdf-output']['base-url'] + asset_name + '/'
-else: asset_base_ref = params['rdf-output']['output-path'] + '/' + asset_name + '/'
+if params['rdf-output']['base-url'].endswith('/'): asset_base_ref = params['rdf-output']['base-url'] 
+else: asset_base_ref = params['rdf-output']['base-url'] + '/'
 asset_ref =  URIRef(asset_base_ref)
 beo_ref =  URIRef("https://w3id.org/beo#")
 
@@ -157,7 +157,6 @@ for declaration in schema.declarations():
             elif type == 'binary': type = XSD.boolean
             else: print(type)
             type_maps[declaration.name()]=type                
-
 
 ## non-geometrical information
 
