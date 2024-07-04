@@ -38,7 +38,6 @@ XSD = Namespace("http://www.w3.org/2001/XMLSchema#")
 RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
 RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
 OWL = Namespace("http://www.w3.org/2002/07/owl#")
-SCHEMA = Namespace("https://schema.org/")
 
 # Bind your custom prefix
 g.bind("beo", BEO)
@@ -50,7 +49,6 @@ g.bind('xsd', XSD)
 g.bind('express',EXPRESS)
 g.bind('cc', CC)
 g.bind('dce', DCE)
-g.bind('schema', SCHEMA)
 
 def is_supertype(entity, supertype:str):
     inheritance=[]
@@ -207,8 +205,20 @@ selects = []
 entities = []
 labels = {}
 
+
+ignore_relations = [
+            'IfcRelSpaceBoundary',
+            'IfcRelInterferesElements',
+            'IfcRelConnectsElements',
+            'IfcRelConnectsWithRealizingElements',
+            'IfcRelConnectsPorts'
+            'IfcRelDefines',
+            'IfcRelDefinesByObject',
+            'IfcRelDefinesByProperties',
+            'IfcRelDefinesByTemplate',
+            'IfcRelDefinesByType'
+        ]
 ignore_attrs =[    
-            "Name",
             "OwnerHistory",
             "RefLatitude",
             "RefLongitude",
@@ -265,7 +275,25 @@ for declaration in schema.declarations():
     elif declaration.as_entity(): #List entities to process them later
         entities.append(declaration)
     
-sub_ontology_root = ['IfcBuiltElement', 'IfcElementAssembly', 'IfcElementComponent', 'IfcTransportElement'] # The Root class for the ontology
+sub_ontology_root_name = 'IfcElement' # The Root class for the ontology
+root_supertypes = []
+inverse_attributes ={}
+
+#prepare inverse attrs dictionary and get the supertypes of the root class
+for key in config_file.keys():
+    entity = schema.declaration_by_name('Ifc'+ key)
+    #create inverse attributes dictionary.
+    if not entity.supertype():
+        inverse_attributes[entity.name()]=[inv_attr.name() for inv_attr in entity.all_inverse_attributes()]
+        iterate_subtypes_inverse_attrs(entity, inverse_attributes)
+
+    #get collapsed supertypes for sub-ontology
+    if entity.name() == sub_ontology_root_name:
+        root_supertypes = get_suertypes(entity)
+        inverse_attributes[entity.name()]=[inv_attr.name() for inv_attr in entity.all_inverse_attributes()]
+        iterate_subtypes_inverse_attrs(entity, inverse_attributes)
+
+print(inverse_attributes)
 
 # Create entities
 for entity  in entities:
@@ -275,11 +303,12 @@ for entity  in entities:
     if entity_name[3:] not in config_file.keys(): continue
 
     # get root class data
-    if entity_name in sub_ontology_root:
+    if entity_name == sub_ontology_root_name:
         supertype =  None
+        attrs = entity.all_attributes()
     else:
         supertype =  entity.supertype()
-    attrs = entity.attributes()
+        attrs = entity.attributes()
 
     # get attributes abstract, derived anda list of the class subtypes to create the graph 
     abstract = entity.is_abstract()
@@ -401,8 +430,117 @@ for entity  in entities:
         # Add attr label to the graph
         g.add((BEO[attr_name], RDFS.label,  Literal(attr_label)))
 
-for root in sub_ontology_root:
-    g.add((BEO[root[3:]], RDFS.subClassOf, SCHEMA.Product))
+    #add inverse attributes
+    inv_attrs = entity.all_inverse_attributes()
+    for inv_attr in inv_attrs:
+        
+        if inv_attr.name() in ignore_attrs:
+            continue
+        
+        #only  process the inverse attributes assigned specifically to  the entity
+        if inv_attr.name() in inverse_attributes[entity.name()]:
+
+            inverse_attr_label = inv_attr.name()
+            inverse_attr_name = inverse_attr_label[0].lower() + inverse_attr_label[1:]
+            bound1 = inv_attr.bound1()
+            bound2 = inv_attr.bound2()
+
+            reference_entity= inv_attr.entity_reference()
+
+            if reference_entity.name() in ignore_relations: continue
+
+            reference_entity_attrs = [item for item in reference_entity.all_attributes() if item.name() not in ['GlobalId','OwnerHistory', 'Name', 'Description', 'RelatedObjectsType', 'ActingRole', 'ConnectionGeometry', 'QuantityInProcess', 'SequenceType', 'TimeLag', 'UserDefinedSequenceType' ]]
+            inverse_of_attr = inv_attr.attribute_reference()
+            reference_entity_attr = None     
+
+            if len(reference_entity_attrs) > 2: continue
+            
+            if len(reference_entity_attrs)==2:
+                for ref_attr in reference_entity_attrs:
+                    if inverse_of_attr.name() != ref_attr.name():
+                        reference_entity_attr = ref_attr #this wont work well if the ref  entity has more than 2 attrs
+            else: reference_entity_attr = None
+            
+            if reference_entity_attr:
+                reference_entity_attr_type = reference_entity_attr.type_of_attribute()
+
+                if reference_entity_attr_type.as_simple_type():
+                    pass
+
+                elif reference_entity_attr_type.as_named_type():
+                    
+                    if reference_entity_attr_type.declared_type().as_entity():
+                        ref_entity_name = reference_entity_attr_type.declared_type().name()
+
+                        if ref_entity_name[3:] not in config_file.keys():  
+                            if ref_entity_name  in root_supertypes:
+                                ref_entity_name = sub_ontology_root_name
+                            else: continue
+                        print(entity_name, inv_attr.name())
+                        g.add((BEO[inverse_attr_name], RDF.type,  OWL.ObjectProperty))
+                        g.add((BEO[inverse_attr_name], RDFS.label,  Literal(inverse_attr_label)))
+                        g.add((BEO[inverse_attr_name], RDFS.domain,  BEO[entity_name[3:]]))
+                        g.add((BEO[inverse_attr_name], RDFS.range,  BEO[ref_entity_name[3:]]))
+                
+                elif reference_entity_attr_type.as_aggregation_type():
+
+                    type_of_element = reference_entity_attr_type.type_of_element()
+                    
+                    if type_of_element.declared_type().as_entity():
+                        ref_entity_name = reference_entity_attr_type.type_of_element().declared_type().name()
+                        
+                        if ref_entity_name[3:] not in config_file.keys():  
+                            if ref_entity_name  in root_supertypes:
+                                ref_entity_name = sub_ontology_root_name
+                            else: continue
+                        print(entity_name, inv_attr.name())
+                        g.add((BEO[inverse_attr_name], RDF.type,  OWL.ObjectProperty))
+                        g.add((BEO[inverse_attr_name], RDFS.label,  Literal(inverse_attr_label)))
+                        g.add((BEO[inverse_attr_name], RDFS.domain,  BEO[entity_name[3:]]))
+                        g.add((BEO[inverse_attr_name], RDFS.range,  BEO[ref_entity_name[3:]]))
+                    
+                    elif type_of_element.declared_type().as_select_type():
+                        items= []
+                        items = unnest_select(type_of_element.declared_type(), items)
+
+                        for item in items:
+                            if item.name()[3:] in config_file.keys():
+                                print(entity_name, inv_attr.name())
+                                g.add((BEO[inverse_attr_name], RDF.type,  OWL.ObjectProperty))
+                                g.add((BEO[inverse_attr_name], RDFS.label,  Literal(inverse_attr_label)))
+                                g.add((BEO[inverse_attr_name], RDFS.domain,  BEO[entity_name[3:]]))
+                                g.add((BEO[inverse_attr_name], RDFS.range,  BEO[item.name()[3:]]))
+                            else:
+                                
+                                if  item.name() in root_supertypes:
+                                    print(item_name)
+                                    print(entity_name, inv_attr.name())
+                                    g.add((BEO[inverse_attr_name], RDF.type,  OWL.ObjectProperty))
+                                    g.add((BEO[inverse_attr_name], RDFS.label,  Literal(inverse_attr_label)))
+                                    g.add((BEO[inverse_attr_name], RDFS.domain,  BEO[entity_name[3:]]))
+                                    g.add((BEO[inverse_attr_name], RDFS.range,  BEO[sub_ontology_root_name[3:]]))
+
+                    else:
+                        pass
+                
+
+
+
+#add uuid and ifcId properties
+g.add((BEO['uuid'], RDF.type,  OWL.DatatypeProperty))
+g.add((BEO['ifc-globalId'], RDF.type,  OWL.DatatypeProperty))
+
+#add domains
+g.add((BEO['uuid'], RDFS.domain,  BEO[sub_ontology_root_name[3:]]))
+g.add((BEO['ifc-globalId'], RDFS.domain,  BEO[sub_ontology_root_name[3:]]))
+
+#add ranges
+g.add((BEO['uuid'], RDFS.range,  XSD.string))
+g.add((BEO['ifc-globalId'], RDFS.range,  XSD.string))
+
+# Add labels
+g.add((BEO['uuid'], RDFS.label,  Literal('uuid')))
+g.add((BEO['ifc-globalId'], RDFS.label,  Literal('ifc-globalId')))
 
 date = datetime.datetime.now()
 
