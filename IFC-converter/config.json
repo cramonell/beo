@@ -1,0 +1,15 @@
+{   
+    "ifc-file-path": "IFC-converter/tests/IFC/llobregat-bridge.ifc",
+    "rdf-output":{
+        "output-path": "./IFC-converter/tests/RDF",
+        "output-name": "llobregat-bridge",
+        "output-format": "ttl",
+        "base-url": "http://0.0.0.0:5004/containers/cont_001/data/graph/"
+    },
+    "geometry-output":{
+        "convert": true,
+        "output-format": "ifc",
+        "split": false,
+        "output-path":"./IFC-converter/tests/IFC"
+    }
+}
