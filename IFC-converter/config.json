@@ -4,7 +4,8 @@
         "output-path": "./IFC-converter/tests/RDF",
         "output-name": "llobregat-bridge",
         "output-format": "ttl",
-        "base-url": "http://0.0.0.0:5004/containers/cont_001/data/graph/"
+        "base-url": "http://www.example.org/RoadNetworkManager/Bridges/data/",
+        "url-prefix": "roadNetworkManager"
     },
     "geometry-output":{
         "convert": true,

@@ -93,7 +93,7 @@ g.bind("brot", BROT)
 g.bind("bridge", BRCOMP)
 g.bind("brcomp", BRIDGE)
 g.bind("bot", BOT)
-g.bind('inst', INST)
+g.bind(params['rdf-output']['url-prefix'], INST)
 g.bind('rdf', RDF)
 g.bind('rdfs', RDFS)
 g.bind('owl', OWL)
@@ -105,7 +105,6 @@ g.bind('fog', FOG)
 g.bind('gom', GOM)
 
 g.add((asset_ref, RDF.type, OWL.Ontology ))
-
 
 
 created_types = {}
